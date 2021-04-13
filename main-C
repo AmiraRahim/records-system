@@ -1,0 +1,420 @@
+#include <stdio.h>
+#include <conio.h>
+#include <time.h>
+#include <string.h>
+//#include <stdlib.h>
+
+struct TIME
+{
+  int hrs;
+  int min;
+};
+
+struct info
+{
+	char name[20];
+	long long int idic;
+	char status[10];
+	struct TIME start;
+	struct TIME end;
+	char purpose[15];
+};
+
+char file_name[];
+
+int main ()
+{
+	int data;
+	int choice;
+	int opt;
+	
+	printf("\n\t\t\t\t\t\t\    WELCOME!\n\n");
+	printf ("\tFile Name [example: lab_access.txt]>> "); fflush(stdin); gets(file_name);
+	
+	while(1)
+	{
+		system("cls");
+		printf("\t======================================================================================\n");
+		printf("\t\tCenter For Engineering Computational Intelligence Research Lab Access\n");
+		printf("\t======================================================================================\n\n");
+
+		printf("\t\t1. Add record\n");
+		printf("\t\t2. Update record\n");
+		printf("\t\t3. Total time\n");
+		printf("\t\t4. Summary\n");
+		printf("\t\t5. Exit\n\n");
+
+		//printf("======================================================================================================================\n\n");
+
+		printf("\n\tPlease enter your Choice: ");
+		scanf("%d",&choice);
+		
+		
+
+		switch(choice)
+			{
+				case 1: add_record();
+				break;
+				
+				case 2: update();
+				break;
+				
+				case 3: 
+				{
+					system("cls");
+					printf("\n\tTotal time by: [1]Name [2]Status >> "); scanf("%d", &opt);
+				
+					switch(opt)
+					{ 
+						case 1: search_name();
+						break;
+				
+						case 2: search_status();
+						break;	
+					}
+				}
+				break;
+								
+				case 4: summary();
+				break;
+				
+				case 5: 
+				system("cls");
+				exit(0);
+				break;
+
+				default : 
+				system("cls");
+				printf("Invalid input!\n");
+				printf("Enter any key to try again");
+				getchar();
+				break;
+			}
+				
+	}
+			
+		getch();
+	
+
+return 0;
+}
+
+
+
+void add_record()
+{
+	system("cls");
+	struct info curr;
+	FILE *f1; 
+	f1=fopen(file_name,"a+");
+	
+	if(f1 == NULL)
+    {
+      printf("Error opening the file!"); 
+	  exit(1);     
+	}
+	
+	printf("\t\t\t\t\t\t----------------\n");
+	printf("\t\t\t\t\t\t|| Add Record ||\n");
+	printf("\t\t\t\t\t\t----------------\n\n");
+	
+	printf("\tNAME >> "); fflush(stdin) ;gets(curr.name);
+	printf("\tID / IC NO. >> "); scanf("%lld", &curr.idic);
+	printf("\tSTATUS [Staff/Student/Visitor] >> "); fflush(stdin); gets(curr.status);
+	printf("\tENTER TIME [Example: 23:59] >> "); scanf("%d:%d", &curr.start.hrs, &curr.start.min); //curr.enter=local_time();
+	printf("\tEXIT TIME >> 00.00"); //scanf("%f", &curr.exit);
+	printf("\n\tPURPOSE [Discussion/Experiment/Visit] >> "); fflush(stdin); gets(curr.purpose);
+	
+	curr.end.hrs = 0; curr.end.min = 0;
+	fprintf (f1, "%s ; %lld ; %s ; %02d:%02d ; %02d:%02d ; %s ;\n", curr.name, curr.idic, curr.status, curr.start.hrs, curr.start.min, curr.end.hrs, curr.end.min, curr.purpose);
+	
+	fclose(f1);
+	getch();
+}
+
+
+
+void update()
+{
+	system("cls");
+	char key_search[20];
+	struct TIME t_search;
+	struct info temp[100];	
+	int i, n = 0 , found = 0 ;
+	
+	FILE *f1;
+	FILE *f2;
+	
+	f1=fopen(file_name,"r");	
+		if(f1 == NULL)
+    	{
+      		printf("Error opening the file!");   
+      		exit(1);      
+		}
+		
+	f2=fopen("temp.txt","a+");
+		if(f2 == NULL)
+		{
+			printf("Error opening the file!");   
+      		exit(1);      
+		}
+	
+	
+	printf("\t\t\t\t\t\t------------\n");
+	printf("\t\t\t\t\t\t|| Update ||\n");
+	printf("\t\t\t\t\t\t------------\n\n");
+
+	printf("\tNAME >> "); fflush(stdin); gets(key_search);
+	printf("\tENTER TIME [Example: 23:59] >> "); scanf("%d:%d", &t_search.hrs, &t_search.min);
+	
+	while(!feof(f1))
+	{	
+		fscanf(f1, "%s ; %lld ; %s ; %d:%d ; %d:%d ; %s ;\n", temp[n].name, &temp[n].idic, temp[n].status, &temp[n].start.hrs, &temp[n].start.min, &temp[n].end.hrs, &temp[n].end.min, temp[n].purpose);
+		n++;
+	}
+	
+	for(i=0 ; i<n ; i++)
+	{	
+		if ((strcmp(key_search , temp[i].name) == 0) && (t_search.hrs = temp[i].start.hrs)) //&& (t_search.min = temp[i].start.min))
+		{
+		 	found = 1;
+		 	printf("\n\n    =============================================================================================================\n");
+			printf("    \tNAME\t\t     ID / IC\t\t  STATUS\t ENTER TIME\t EXIT TIME\tPURPOSE\n");
+			printf("    =============================================================================================================\n");
+		 	
+			printf("   \t%-15s\t",temp[i].name);
+			printf("%14lld\t\t", temp[i].idic);
+			printf("%9s\t", temp[i].status);
+			printf(" %02d:%02d\t", temp[i].start.hrs, temp[i].start.min);
+			printf("\t  %02d:%02d", temp[i].end.hrs, temp[i].end.min);
+			printf(" %15s\t\n", temp[i].purpose);
+		 	
+			printf("\n\n\tEXIT TIME to update [Example: 23:59] >> "); fflush(stdin); scanf("%d:%d", &temp[i].end.hrs, &temp[i].end.min);
+			fprintf(f2, "%s ; %lld ; %s ; %02d:%02d ; %02d:%02d ; %s ;\n", temp[i].name, temp[i].idic, temp[i].status, temp[i].start.hrs, temp[i].start.min, temp[i].end.hrs, temp[i].end.min, temp[i].purpose);
+		}		 
+		
+		else fprintf(f2, "%s ; %lld ; %s ; %02d:%02d ; %02d:%02d ; %s ;\n", temp[i].name, temp[i].idic, temp[i].status, temp[i].start.hrs, temp[i].start.min, temp[i].end.hrs, temp[i].end.min, temp[i].purpose);
+	}
+
+	if (found != 1)
+	{
+		printf("\n\t\t\t\t\t    INFORMATION NOT FOUND!\n");
+		getch();
+	}
+	
+	fclose(f1);
+	fclose(f2);
+	remove(file_name);
+	rename("temp.txt",file_name);
+
+}
+
+
+
+void search_name()
+{
+	system("cls");
+	char key_search[20];
+	int found = 0, end_min = 0, end_hour = 0;
+	struct info temp;
+	struct TIME diff;
+	
+	FILE *f1;
+	f1=fopen(file_name,"r");	
+		if(f1 == NULL)
+    	{
+      		printf("Error opening the file!");   
+      		exit(1);      
+		}
+		
+		
+	printf("\t\t\t\t\t\t  ------------\n");
+	printf("\t\t\t\t\t\t  || Search ||\n");
+	printf("\t\t\t\t\t\t  ------------\n\n");
+	
+	printf("\tEnter name : "); fflush(stdin); gets(key_search);
+	
+	
+	
+	printf("\n    =================================================================================================================\n");
+	printf("    \tNAME\t\t ID / IC\t  STATUS\t ENTER TIME\t EXIT TIME\tPURPOSE \t TOTAL TIME\n");
+	printf("    =================================================================================================================\n");
+	
+	while(!feof(f1))
+		{
+		
+		fscanf(f1, "%s ; %lld ; %s ; %d:%d ; %d:%d ; %s ;\n", temp.name, &temp.idic, temp.status, &temp.start.hrs, &temp.start.min, &temp.end.hrs, &temp.end.min, temp.purpose);
+		
+		if (strcmp(key_search,temp.name) == 0)
+			{
+				found = 1 ;
+			    if(temp.end.min < temp.start.min)
+				{
+        			end_hour = temp.end.hrs - 1;
+       				end_min = temp.end.min + 60;
+    			}
+    			
+				else 
+				{
+					end_hour = temp.end.hrs;
+					end_min = temp.end.min;
+				}
+				
+    			diff.min = end_min - temp.start.min;
+    			diff.hrs = end_hour - temp.start.hrs;
+				printf("   \t%-12s",temp.name);
+				printf("%14lld\t", temp.idic);
+				printf("%8s\t  ", temp.status);
+				printf(" %02d:%02d\t", temp.start.hrs, temp.start.min);
+				printf("   %02d:%02d", temp.end.hrs, temp.end.min);
+				printf(" %15s\t", temp.purpose);
+				printf("%02dhrs %02dmins\n", diff.hrs, diff.min);
+			}		
+			
+		}
+	
+	if (found != 1)
+	{
+		printf("\n\t\t\t\t\t\t  NAME NOT FOUND!\n");
+		getch();
+	}
+			
+	fclose(f1);
+	getch();
+
+}
+
+void search_status()
+{
+	system("cls");
+	char key_search[20];
+	int i, n=0, found=0, end_min=0, end_hour=0;
+	struct info temp[100];
+	struct TIME diff;
+	
+	FILE *f1;
+	f1=fopen(file_name,"r");	
+		if(f1 == NULL)
+    	{
+      		printf("Error opening the file!");   
+      		exit(1);      
+		}
+		
+		
+	printf("\t\t\t\t\t\t  ------------\n");
+	printf("\t\t\t\t\t\t  || Search ||\n");
+	printf("\t\t\t\t\t\t  ------------\n\n");
+	
+	printf("\tEnter status : "); fflush(stdin); gets(key_search);
+	
+	
+	
+	printf("\n    =================================================================================================================\n");
+	printf("    \tNAME\t\t ID / IC\t  STATUS\t ENTER TIME\t EXIT TIME\tPURPOSE \t TOTAL TIME\n");
+	printf("    =================================================================================================================\n");
+	
+	while(!feof(f1))
+	{		
+		fscanf(f1, "%s ; %lld ; %s ; %d:%d ; %d:%d ; %s ;\n", temp[n].name, &temp[n].idic, temp[n].status, &temp[n].start.hrs, &temp[n].start.min, &temp[n].end.hrs, &temp[n].end.min, temp[n].purpose);
+		n++;
+	}
+	
+	for(i=0 ; i<n ; i++)
+	{
+		if (strcmp(key_search,temp[i].status) == 0 )//== 0)||(strcmp(key_search,temp.status)==0)
+		{
+			found = 1 ;
+			if(temp[i].end.min < temp[i].start.min)
+			{
+       			end_hour = temp[i].end.hrs - 1;
+   				end_min = temp[i].end.min + 60;
+   			}
+  	 		else 
+			{	
+				end_hour = temp[i].end.hrs;
+				end_min = temp[i].end.min;
+			}
+    		diff.min = end_min - temp[i].start.min;
+    		diff.hrs = end_hour - temp[i].start.hrs;
+			
+			printf("   \t%-12s",temp[i].name);
+			printf("%14lld\t", temp[i].idic);
+			printf("%8s\t  ", temp[i].status);
+			printf(" %02d:%02d\t", temp[i].start.hrs, temp[i].start.min);
+			printf("   %02d:%02d", temp[i].end.hrs, temp[i].end.min);
+			printf(" %15s\t", temp[i].purpose);
+			printf("%02dhrs %02dmins\n", diff.hrs, diff.min);
+		}
+	}	
+		
+		
+	if (found != 1)
+	{
+		printf("\n\t\t\t\t\t\t  STATUS NOT FOUND!\n");
+		getch();
+	}
+			
+	fclose(f1);
+	getch();
+
+}
+
+
+void summary()
+{
+	system("cls");
+	struct info temp;
+	struct TIME diff;
+	int end_min=0, end_hour; 
+	FILE *f1; 
+	f1=fopen(file_name,"r");
+	
+	if(f1 == NULL)
+    {
+      printf("Error opening the file!");   
+      exit (1);     
+	}
+	
+	printf("\t\t\t\t\t\t -------------\n");
+	printf("\t\t\t\t\t\t || Summary ||\n");
+	printf("\t\t\t\t\t\t -------------\n\n");
+	
+	printf("\n    =================================================================================================================\n");
+	printf("    \tNAME\t\t ID / IC\t  STATUS\t ENTER TIME\t EXIT TIME\tPURPOSE \t TOTAL TIME\n");
+	printf("    =================================================================================================================\n");
+ 
+ 	while(!feof(f1))
+	{
+		fscanf(f1, "%s ; %lld ; %s ; %d:%d ; %d:%d ; %s ;\n", temp.name, &temp.idic, temp.status, &temp.start.hrs, &temp.start.min, &temp.end.hrs, &temp.end.min, temp.purpose);
+		if(temp.end.min < temp.start.min)
+				{
+        			end_hour = temp.end.hrs - 1;
+       				end_min = temp.end.min + 60;
+    			}
+    	else 
+		{
+			end_hour = temp.end.hrs;
+			end_min = temp.end.min;
+		}
+    	
+    	diff.min = end_min - temp.start.min;
+		diff.hrs = end_hour - temp.start.hrs;
+		
+		printf("   \t%-12s",temp.name);
+		printf("%14lld\t", temp.idic);
+		printf("%8s\t  ", temp.status);
+		printf(" %02d:%02d\t", temp.start.hrs, temp.start.min);
+		printf("   %02d:%02d", temp.end.hrs, temp.end.min);
+		printf(" %15s\t", temp.purpose);
+		printf("%02dhrs %02dmins\n", diff.hrs, diff.min);
+		
+		
+	}
+	
+	fclose(f1);
+	getch();
+	
+}
+
+
+//void totals()
